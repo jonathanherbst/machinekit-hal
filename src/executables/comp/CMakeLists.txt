@@ -24,148 +24,147 @@
 # #####################################################################
 # ~~~
 
-if(BUILD_PYTHON_DISTRIBUTIONS)
-  option(BUILD_COMP_EXECUTABLE "Built the Comp executable Python distribution."
-         TRUE)
+option(BUILD_COMP_EXECUTABLE "Built the Comp executable Python distribution."
+        TRUE)
 
-  if(BUILD_COMP_EXECUTABLE)
-    find_program(YAPPS2 "yapps2" REQUIRED)
-    find_program(PYPROJECT_BUILD "pyproject-build" REQUIRED)
-    include(PEP427Installer)
+if(BUILD_COMP_EXECUTABLE)
+  find_program(YAPPS2 "yapps2" REQUIRED)
+  #find_program(PYPROJECT_BUILD "pyproject-build" REQUIRED)
+  set(PYPROJECT_BUILD "python -m build")
+  include(PEP427Installer)
 
-    define_property(
-      GLOBAL
-      PROPERTY MACHINEKIT_HAL_COMP
-      BRIEF_DOCS "Path to the Comp executable"
-      FULL_DOCS
-        [[
-      Machinekit-HAL buildsystem (internal only) global property to specify the legacy Comp
-      executable (which should live in a special Python virtual environment).
-      ]])
+  define_property(
+    GLOBAL
+    PROPERTY MACHINEKIT_HAL_COMP
+    BRIEF_DOCS "Path to the Comp executable"
+    FULL_DOCS
+      [[
+    Machinekit-HAL buildsystem (internal only) global property to specify the legacy Comp
+    executable (which should live in a special Python virtual environment).
+    ]])
 
-    set(PACKAGE_NAME "comp")
+  set(PACKAGE_NAME "comp")
 
-    set(DISTRIBUTION_NAME "${MACHINEKIT_HAL_PACKAGE_PREFIX}_${PACKAGE_NAME}")
-    string(REGEX REPLACE "[._~ ]" "-" DISTRIBUTION_NORMALIZED_NAME
-                         ${DISTRIBUTION_NAME})
+  set(DISTRIBUTION_NAME "${MACHINEKIT_HAL_PACKAGE_PREFIX}_${PACKAGE_NAME}")
+  string(REGEX REPLACE "[._~ ]" "-" DISTRIBUTION_NORMALIZED_NAME
+                        ${DISTRIBUTION_NAME})
 
-    # Files representing the Python package
-    set(COMP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/comp.g)
-    set(PYTHON_INIT ${CMAKE_CURRENT_SOURCE_DIR}/src/__init__.py)
-    set(PYTHON_PYPROJECT ${CMAKE_CURRENT_SOURCE_DIR}/src/pyproject.toml.in)
+  # Files representing the Python package
+  set(COMP_SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/comp.g)
+  set(PYTHON_INIT ${CMAKE_CURRENT_SOURCE_DIR}/src/__init__.py)
+  set(PYTHON_PYPROJECT ${CMAKE_CURRENT_SOURCE_DIR}/src/pyproject.toml.in)
 
-    set(OUTPUT_INDEX
-        ${MACHINEKIT_HAL_PYTHON_INDEX}/${DISTRIBUTION_NORMALIZED_NAME})
+  set(OUTPUT_INDEX
+      ${MACHINEKIT_HAL_PYTHON_INDEX}/${DISTRIBUTION_NORMALIZED_NAME})
 
-    file(REMOVE_RECURSE
-         ${CMAKE_CURRENT_BINARY_DIR}/${DISTRIBUTION_NORMALIZED_NAME})
+  file(REMOVE_RECURSE
+        ${CMAKE_CURRENT_BINARY_DIR}/${DISTRIBUTION_NORMALIZED_NAME})
 
-    add_custom_command(
-      OUTPUT
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
-      COMMAND
-        ${YAPPS2} ${COMP_SOURCE}
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
-      MAIN_DEPENDENCY ${COMP_SOURCE}
-      COMMENT "Compiling the '${PACKAGE_NAME}' Python script")
+  add_custom_command(
+    OUTPUT
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
+    COMMAND
+      ${YAPPS2} ${COMP_SOURCE}
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
+    MAIN_DEPENDENCY ${COMP_SOURCE}
+    COMMENT "Compiling the '${PACKAGE_NAME}' Python script")
 
-    configure_file(
-      ${PYTHON_INIT}
-      ${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/__init__.py
-      COPYONLY
-      NO_SOURCE_PERMISSIONS)
-    configure_file(${PYTHON_PYPROJECT} ${PACKAGE_NAME}/pyproject.toml @ONLY
-                   NEWLINE_STYLE UNIX NO_SOURCE_PERMISSIONS)
+  configure_file(
+    ${PYTHON_INIT}
+    ${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/__init__.py
+    COPYONLY
+    NO_SOURCE_PERMISSIONS)
+  configure_file(${PYTHON_PYPROJECT} ${PACKAGE_NAME}/pyproject.toml @ONLY
+                  NEWLINE_STYLE UNIX NO_SOURCE_PERMISSIONS)
 
-    add_custom_command(
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_wheel.stamp
-      DEPENDS
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/__init__.py
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/pyproject.toml
-      COMMAND ${CMAKE_COMMAND} "-E" "rm" "-f" "${OUTPUT_INDEX}/*.whl"
-      COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${OUTPUT_INDEX}"
-      COMMAND
-        ${CMAKE_COMMAND} "-E" "env"
-        "CMAKE_PREFIX_PATH=${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}"
-        "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-w"
-        "-o" "${OUTPUT_INDEX}" "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}"
-      COMMAND ${CMAKE_COMMAND} "-E" "touch"
-              "${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_wheel.stamp"
-      COMMENT
-        "Building Python package wheel ${DISTRIBUTION_NAME} via external tool")
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_wheel.stamp
+    DEPENDS
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/__init__.py
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/pyproject.toml
+    COMMAND ${CMAKE_COMMAND} "-E" "rm" "-f" "${OUTPUT_INDEX}/*.whl"
+    COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${OUTPUT_INDEX}"
+    COMMAND
+      ${CMAKE_COMMAND} "-E" "env"
+      "CMAKE_PREFIX_PATH=${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}"
+      "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-w"
+      "-o" "${OUTPUT_INDEX}" "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}"
+    COMMAND ${CMAKE_COMMAND} "-E" "touch"
+            "${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_wheel.stamp"
+    COMMENT
+      "Building Python package wheel ${DISTRIBUTION_NAME} via external tool")
 
-    add_custom_command(
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_sdist.stamp
-      DEPENDS
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/__init__.py
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
-        ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/pyproject.toml
-      COMMAND ${CMAKE_COMMAND} "-E" "rm" "-f" "${OUTPUT_INDEX}/*.tar.gz"
-      COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${OUTPUT_INDEX}"
-      COMMAND
-        ${CMAKE_COMMAND} "-E" "env"
-        "CMAKE_PREFIX_PATH=${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}"
-        "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-s"
-        "-o" "${OUTPUT_INDEX}" "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}"
-      COMMAND ${CMAKE_COMMAND} "-E" "touch"
-              "${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_sdist.stamp"
-      COMMENT
-        "Building Python package sdist ${DISTRIBUTION_NAME} via external tool")
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_sdist.stamp
+    DEPENDS
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/__init__.py
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/src/${MACHINEKIT_HAL_PACKAGE_PREFIX_PATH}/${PACKAGE_NAME}/comp.py
+      ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}/pyproject.toml
+    COMMAND ${CMAKE_COMMAND} "-E" "rm" "-f" "${OUTPUT_INDEX}/*.tar.gz"
+    COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${OUTPUT_INDEX}"
+    COMMAND
+      ${CMAKE_COMMAND} "-E" "env"
+      "CMAKE_PREFIX_PATH=${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}"
+      "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-s"
+      "-o" "${OUTPUT_INDEX}" "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}"
+    COMMAND ${CMAKE_COMMAND} "-E" "touch"
+            "${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_sdist.stamp"
+    COMMENT
+      "Building Python package sdist ${DISTRIBUTION_NAME} via external tool")
 
-    add_custom_target(
-      ${DISTRIBUTION_NAME}_wheel_distribution ALL
-      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_wheel.stamp
-      COMMENT
-        "Requesting building Python package wheel ${DISTRIBUTION_NAME} via external tool"
-    )
+  add_custom_target(
+    ${DISTRIBUTION_NAME}_wheel_distribution ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_wheel.stamp
+    COMMENT
+      "Requesting building Python package wheel ${DISTRIBUTION_NAME} via external tool"
+  )
 
-    add_custom_target(
-      ${DISTRIBUTION_NAME}_sdist_distribution ALL
-      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_sdist.stamp
-      COMMENT
-        "Requesting building Python package sdist ${DISTRIBUTION_NAME} via external tool"
-    )
+  add_custom_target(
+    ${DISTRIBUTION_NAME}_sdist_distribution ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_sdist.stamp
+    COMMENT
+      "Requesting building Python package sdist ${DISTRIBUTION_NAME} via external tool"
+  )
 
-    add_custom_command(
-      OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build_comp_executable.stamp
-      DEPENDS ${DISTRIBUTION_NAME}_wheel_distribution
-      COMMAND Python::Interpreter "-m" "venv"
-              "${CMAKE_CURRENT_BINARY_DIR}/venv_comp"
-      COMMAND
-        ${CMAKE_COMMAND} "-E" "env"
-        "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/pip" "install"
-        "--force-reinstall" "${OUTPUT_INDEX}/*.whl"
-      COMMENT "Creating virtual environment for the 'comp' tool")
+  add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build_comp_executable.stamp
+    DEPENDS ${DISTRIBUTION_NAME}_wheel_distribution
+    COMMAND Python::Interpreter "-m" "venv"
+            "${CMAKE_CURRENT_BINARY_DIR}/venv_comp"
+    COMMAND
+      ${CMAKE_COMMAND} "-E" "env"
+      "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/pip" "install"
+      "--force-reinstall" "${OUTPUT_INDEX}/*.whl"
+    COMMENT "Creating virtual environment for the 'comp' tool")
 
-    add_custom_target(
-      comp_executable ALL
-      DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build_comp_executable.stamp
-      COMMENT "Building the virtual environment for the 'comp' tool")
+  add_custom_target(
+    comp_executable ALL
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build_comp_executable.stamp
+    COMMENT "Building the virtual environment for the 'comp' tool")
 
-    add_dependencies(comp_executable ${DISTRIBUTION_NAME}_wheel_distribution)
+  add_dependencies(comp_executable ${DISTRIBUTION_NAME}_wheel_distribution)
 
-    configure_file(
-      ${CMAKE_CURRENT_SOURCE_DIR}/src/MachinekitHALCompFunction.cmake
-      ${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}/MachinekitHALCompFunction.cmake
-      @ONLY
-      NEWLINE_STYLE UNIX NO_SOURCE_PERMISSIONS)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/MachinekitHALCompFunction.cmake
+    ${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}/MachinekitHALCompFunction.cmake
+    @ONLY
+    NEWLINE_STYLE UNIX NO_SOURCE_PERMISSIONS)
 
-    set_property(
-      GLOBAL PROPERTY MACHINEKIT_HAL_COMP
-                      "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/comp")
+  set_property(
+    GLOBAL PROPERTY MACHINEKIT_HAL_COMP
+                    "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/comp")
 
-    install_wheel(WHEEL "${OUTPUT_INDEX}" COMPONENT
-                  MachinekitHAL_Executable_Comp_Python_Packages)
+  install_wheel(WHEEL "${OUTPUT_INDEX}" COMPONENT
+                MachinekitHAL_Executable_Comp_Python_Packages)
 
-    cpack_add_component(
-      MachinekitHAL_Executable_Comp_Python_Packages
-      DEPENDS MachinekitHAL_Library_Symbol_Visibility_CMake_Functions
-      GROUP MachinekitHAL_Executable_Comp)
+  cpack_add_component(
+    MachinekitHAL_Executable_Comp_Python_Packages
+    DEPENDS MachinekitHAL_Library_Symbol_Visibility_CMake_Functions
+    GROUP MachinekitHAL_Executable_Comp)
 
-    # Specification of artifacts placement in package tree
-    cpack_add_component_group(
-      MachinekitHAL_Executable_Comp
-      PARENT_GROUP MachinekitHAL_Package_Base_Python_Executables)
-  endif()
+  # Specification of artifacts placement in package tree
+  cpack_add_component_group(
+    MachinekitHAL_Executable_Comp
+    PARENT_GROUP MachinekitHAL_Package_Base_Python_Executables)
 endif()
