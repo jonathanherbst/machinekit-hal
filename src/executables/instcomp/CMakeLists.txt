@@ -138,7 +138,7 @@ if(BUILD_PYTHON_DISTRIBUTIONS)
     add_custom_command(
       OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/build_instcomp_executable.stamp
       DEPENDS ${DISTRIBUTION_NAME}_wheel_distribution
-      COMMAND Python::Interpreter "-m" "venv"
+      COMMAND Python::Interpreter "-m" "venv" "--system-site-packages"
               "${CMAKE_CURRENT_BINARY_DIR}/venv_instcomp"
       COMMAND
         ${CMAKE_COMMAND} "-E" "env"
