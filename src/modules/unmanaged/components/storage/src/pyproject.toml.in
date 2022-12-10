@@ -54,5 +54,5 @@ includes = [
 package-dir = "src"
 
 [build-system]
-requires = ["pdm-pep517", "setuptools"]
-build-backend = "pdm.pep517.api"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
