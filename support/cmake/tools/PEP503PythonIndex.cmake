@@ -75,7 +75,7 @@ add_custom_target(
   DEPENDS create_binary_tree_venv generate_pep503_index
   COMMAND
     ${FIND} "${MACHINEKIT_HAL_PYTHON_INDEX}" "-iname" "*.whl" "-exec"
-    "${PYTHON_VENV_DIRECTORY}/bin/pip" "install" "--force-reinstall"
+    "${PYTHON_VENV_DIRECTORY}/bin/python" "-m" "pip" "install" "--force-reinstall"
     "--extra-index-url" "file://${MACHINEKIT_HAL_PYTHON_INDEX}" "{}" \;
   VERBATIM
   COMMENT
