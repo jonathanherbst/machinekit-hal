@@ -142,7 +142,7 @@ if(BUILD_PYTHON_DISTRIBUTIONS)
               "${CMAKE_CURRENT_BINARY_DIR}/venv_instcomp"
       COMMAND
         ${CMAKE_COMMAND} "-E" "env"
-        "${CMAKE_CURRENT_BINARY_DIR}/venv_instcomp/bin/python" "-m" "pip" "install"
+        "${CMAKE_CURRENT_BINARY_DIR}/venv_instcomp/bin/python" "-m" "pip" "install" "--no-deps"
         "${OUTPUT_INDEX}/*.whl"
       COMMENT "Creating virtual environment for the 'instcomp' tool")
 
