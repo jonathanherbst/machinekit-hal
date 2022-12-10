@@ -135,7 +135,7 @@ if(BUILD_PYTHON_DISTRIBUTIONS)
       COMMAND
         ${CMAKE_COMMAND} "-E" "env"
         "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/python" "-m" "pip" "install"
-        "--force-reinstall" "${OUTPUT_INDEX}/*.whl"
+        "${OUTPUT_INDEX}/*.whl"
       COMMENT "Creating virtual environment for the 'comp' tool")
 
     add_custom_target(
