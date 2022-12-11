@@ -32,7 +32,6 @@
 
 #include <stdio.h>
 #include <string>
-using namespace std;
 #include <pin.hh>
 #define CPPINS
 
@@ -164,7 +163,7 @@ static int instantiate_lutn(const char *name,
 extern "C" int rtapi_app_main(void)
 {
 
-    string s(compname);
+    std::string s(compname);
 
     comp_id = hal_xinit(TYPE_RT, 0, 0, instantiate_lutn, NULL, compname);
     if (comp_id < 0)

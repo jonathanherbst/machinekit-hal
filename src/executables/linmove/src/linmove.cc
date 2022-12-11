@@ -12,7 +12,6 @@
 
 #include <machinetalk/json2pb.hh>
 
-using namespace std;
 using namespace google::protobuf;
 
 enum axis_mask {
@@ -95,28 +94,28 @@ int main(int argc, char* argv[])
     // the following stunts on c are available:
 
     // serialize to protobuf wire format
-    string wireformat;
+    std::string wireformat;
     assert(c.SerializeToString(&wireformat));
 
     // generate external text representation
-    string text;
+    std::string text;
     if (TextFormat::PrintToString(c, &text)) {
-	cout << "Container: \n" <<  text << endl;
+	std::cout << "Container: \n" <<  text << std::endl;
     } else {
-	cerr << "Fail" << endl;
+	std::cerr << "Fail" << std::endl;
     }
 
     // convert from text representation to instance:
     // easy to create a message with an editor
     machinetalk::Container got;
     if (!TextFormat::ParseFromString(text, &got)) {
-	cerr << "Failed to parse '" << text << "'" << endl;
+	std::cerr << "Failed to parse '" << text << "'" << std::endl;
 	return -1;
     }
 
     // a message instance can also be serialized to json, thanks to Pavel:
     std::string json = pb2json(got);
-    cout << "Container converted to JSON:" << json  << endl;
+    std::cout << "Container converted to JSON:" << json  << std::endl;
 
     // and parsed back from json into a message instance with full
     // type checking:

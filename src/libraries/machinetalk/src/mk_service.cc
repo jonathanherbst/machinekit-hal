@@ -18,9 +18,7 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/lexical_cast.hpp>
 
-using namespace std;
-
-typedef vector<string> argvec_t;
+typedef std::vector<std::string> argvec_t;
 
 int mk_getnetopts(mk_netopts_t *n)
 {
@@ -98,7 +96,7 @@ int mk_getnetopts(mk_netopts_t *n)
 static int bind_ifs(mk_socket_t *s, const argvec_t &ifs)
 {
     for (size_t i = 0; i < ifs.size(); i++) {
-	string uri;
+	std::string uri;
 	if ((i == 0) && (s->port < 0)) {
 	    // first bind on ephemeral port
 	    // subsequent binds must be explicitly done
@@ -123,7 +121,7 @@ int mk_bindsocket(mk_netopts_t *n, mk_socket_t *s)
     argvec_t ifs;
     int retval = 0;
     char buf[PATH_MAX-4];  // Leave space for "dsn="
-    string delims("\t ");
+    std::string delims("\t ");
 
     assert(n != NULL);
     assert(s != NULL);
@@ -136,7 +134,7 @@ int mk_bindsocket(mk_netopts_t *n, mk_socket_t *s)
 
 	// first bind all V4 interfaces/addresses
 	if (n->bind_ipv4) {
-	    string input(n->bind_ipv4);
+	    std::string input(n->bind_ipv4);
 	    boost::split(ifs, input, boost::is_any_of(delims),
 			 boost::algorithm::token_compress_on);
 	    retval = bind_ifs(s, ifs);
@@ -146,7 +144,7 @@ int mk_bindsocket(mk_netopts_t *n, mk_socket_t *s)
 	    return retval;
 
 	if (n->bind_ipv6) {
-	    string input(n->bind_ipv6);
+	    std::string input(n->bind_ipv6);
 	    boost::split(ifs, input, boost::is_any_of("\t "),
 			 boost::algorithm::token_compress_on);
 

@@ -13,7 +13,6 @@
 #include <machinetalk/json2pb.hh>
 
 using namespace machinetalk;
-using namespace std;
 using namespace google::protobuf;
 
 int main(int argc, char* argv[])
@@ -22,7 +21,7 @@ int main(int argc, char* argv[])
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     Container c;
     Preview *p;
-    string buffer, text;
+    std::string buffer, text;
 
     c.set_type(MT_PREVIEW);
 
@@ -38,13 +37,13 @@ int main(int argc, char* argv[])
     pos->set_a(3.14);
 
     if (TextFormat::PrintToString(c, &text)) {
-	cout << "PrintToString: \n" <<  text << endl;
+	std::cout << "PrintToString: \n" <<  text << std::endl;
     } else {
-	cerr << "Fail" << endl;
+	std::cerr << "Fail" << std::endl;
     }
 
     if (!c.SerializeToString(&buffer)) {
-	    cerr << "Failed to serialize Preview." << endl;
+	    std::cerr << "Failed to serialize Preview." << std::endl;
 	    exit(1);
     }
 
