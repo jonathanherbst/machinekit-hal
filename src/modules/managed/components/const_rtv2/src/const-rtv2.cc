@@ -30,8 +30,6 @@
 #undef false
 #define false (0)
 
-using namespace std;
-
 #ifdef MODULE_INFO
 MODULE_INFO(machinekit, "component:constant:Use a parameter to set the value of a pin");
 MODULE_INFO(machinekit, "pin:out:float:None:out::None");

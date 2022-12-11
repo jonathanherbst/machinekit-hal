@@ -88,8 +88,6 @@ using namespace google::protobuf;
 #define HALMOD "hal"
 #define RTAPIMOD "runtime"
 
-using namespace std;
-
 /* Pre-allocation size. Must be enough for the whole application life to avoid
  * pagefaults by new memory requested from the system. */
 #define PRE_ALLOC_SIZE (30 * 1024 * 1024)
@@ -103,9 +101,9 @@ typedef int (*halg_foreach_t)(bool use_hal_mutex, foreach_args_t *args,
 typedef int (*hal_exit_usercomps_t)(char *);
 
 static std::map<std::string, std::shared_ptr<Module>> modules;
-static std::map<string, pbstringarray_t> iparms; // default instance params
+static std::map<std::string, pbstringarray_t> iparms; // default instance params
 
-static std::vector<string> loading_order;
+static std::vector<std::string> loading_order;
 static void remove_module(std::string name);
 
 static struct rusage rusage;
@@ -211,8 +209,8 @@ static void configure_flavor(machinetalk::Container &pbreply,
     have_flavor_funcs = 1;         // Don't run this again
 }
 
-static int do_one_item(char item_type_char, const string &param_name,
-                       const string &param_value, void *vitem, int idx,
+static int do_one_item(char item_type_char, const std::string &param_name,
+                       const std::string &param_value, void *vitem, int idx,
                        machinetalk::Container &pbreply)
 {
     char *endp;
@@ -260,25 +258,25 @@ static int do_one_item(char item_type_char, const string &param_name,
     return 0;
 }
 
-void remove_quotes(string &s)
+void remove_quotes(std::string &s)
 {
     s.erase(remove_copy(s.begin(), s.end(), s.begin(), '"'), s.end());
 }
 
 static int do_module_args(std::shared_ptr<Module> mi, pbstringarray_t args,
-                          const string &symprefix,
+                          const std::string &symprefix,
                           machinetalk::Container &pbreply)
 {
     for (int i = 0; i < args.size(); i++) {
-        string s(args.Get(i));
+        std::string s(args.Get(i));
         remove_quotes(s);
         size_t idx = s.find('=');
-        if (idx == string::npos) {
+        if (idx == std::string::npos) {
             note_printf(pbreply, "Invalid parameter `%s'", s.c_str());
             return -1;
         }
-        string param_name(s, 0, idx);
-        string param_value(s, idx + 1);
+        std::string param_name(s, 0, idx);
+        std::string param_value(s, idx + 1);
         void *item = mi->sym<void *>(symprefix + "address_" + param_name);
         if (!item) {
             note_printf(pbreply, "Unknown parameter `%s'", s.c_str());
@@ -292,7 +290,7 @@ static int do_module_args(std::shared_ptr<Module> mi, pbstringarray_t args,
                         s.c_str());
             return -1;
         }
-        string item_type_string = *item_type;
+        std::string item_type_string = *item_type;
 
         if (item_type_string.size() > 1) {
             int a, b;
@@ -308,19 +306,19 @@ static int do_module_args(std::shared_ptr<Module> mi, pbstringarray_t args,
             }
             size_t idx = 0;
             int i = 0;
-            while (idx != string::npos) {
+            while (idx != std::string::npos) {
                 if (i == b) {
                     note_printf(pbreply, "%s: can only take %d arguments",
                                 s.c_str(), b);
                     return -1;
                 }
                 size_t idx1 = param_value.find(",", idx);
-                string substr(param_value, idx, idx1 - idx);
+                std::string substr(param_value, idx, idx1 - idx);
                 int result =
                     do_one_item(item_type_char, s, substr, item, i, pbreply);
                 if (result != 0) return result;
                 i++;
-                idx = idx1 == string::npos ? idx1 : idx1 + 1;
+                idx = idx1 == std::string::npos ? idx1 : idx1 + 1;
             }
         } else {
             char item_type_char = item_type_string[0];
@@ -343,12 +341,12 @@ static const char **pbargv(const pbstringarray_t &args)
     return argv;
 }
 
-static void usrfunct_error(const int retval, const string &func,
+static void usrfunct_error(const int retval, const std::string &func,
                            pbstringarray_t args,
                            machinetalk::Container &pbreply)
 {
     if (retval >= 0) return;
-    string s = pbconcat(args);
+    std::string s = pbconcat(args);
     note_printf(pbreply, "hal_call_usrfunct(%s,%s) failed: %d - %s",
                 func.c_str(), s.c_str(), retval, strerror(-retval));
 }
@@ -381,10 +379,10 @@ static void separate_kv(pbstringarray_t &kvpairs, pbstringarray_t &leftovers,
                         const pbstringarray_t &args)
 {
     bool extra = false;
-    string prefix = "--";
+    std::string prefix = "--";
 
     for (int i = 0; i < args.size(); i++) {
-        string s(args.Get(i));
+        std::string s(args.Get(i));
         remove_quotes(s);
         if (s == prefix) { // standalone separator '--'
             extra = true;
@@ -401,7 +399,7 @@ static void separate_kv(pbstringarray_t &kvpairs, pbstringarray_t &leftovers,
     }
 }
 
-static int do_newinst_cmd(int instance, string comp, string instname,
+static int do_newinst_cmd(int instance, std::string comp, std::string instname,
                           pbstringarray_t args, machinetalk::Container &pbreply)
 {
     int retval = -1;
@@ -421,7 +419,7 @@ static int do_newinst_cmd(int instance, string comp, string instname,
     }
     std::shared_ptr<Module> mi = modules[comp];
 
-    string s = pbconcat(iparms[mi->name]);
+    std::string s = pbconcat(iparms[mi->name]);
 
     // set the default instance parameters which were recorded during
     // initial load with record_instanceparams()
@@ -462,11 +460,11 @@ static int do_newinst_cmd(int instance, string comp, string instname,
     return retval;
 }
 
-static int do_delinst_cmd(int instance, string instname,
+static int do_delinst_cmd(int instance, std::string instname,
                           machinetalk::Container &pbreply)
 {
     int retval = -1;
-    string s;
+    std::string s;
 
     if (call_usrfunct == NULL) {
         pbreply.set_retcode(1);
@@ -485,7 +483,7 @@ static int do_delinst_cmd(int instance, string instname,
     return retval;
 }
 
-static int do_callfunc_cmd(int instance, string func, pbstringarray_t args,
+static int do_callfunc_cmd(int instance, std::string func, pbstringarray_t args,
                            machinetalk::Container &pbreply)
 {
     int retval = -1;
@@ -505,7 +503,7 @@ static int do_callfunc_cmd(int instance, string func, pbstringarray_t args,
     return retval;
 }
 
-static int do_load_cmd(int instance, string path, pbstringarray_t args,
+static int do_load_cmd(int instance, std::string path, pbstringarray_t args,
                        machinetalk::Container &pbreply)
 {
     std::shared_ptr<Module> mi = std::make_shared<Module>();
@@ -563,7 +561,7 @@ static int do_load_cmd(int instance, string path, pbstringarray_t args,
     return 0;
 }
 
-static int do_unload_cmd(int instance, string name,
+static int do_unload_cmd(int instance, std::string name,
                          machinetalk::Container &reply)
 {
 
@@ -727,7 +725,7 @@ static int rtapi_request(zloop_t *loop, zsock_t *socket, void *arg)
         return 0;
     }
     if (z_debug) {
-        string buffer;
+        std::string buffer;
         if (TextFormat::PrintToString(pbreq, &buffer)) {
             fprintf(stderr, "request: %s\n", buffer.c_str());
         }
@@ -902,7 +900,7 @@ static int rtapi_request(zloop_t *loop, zsock_t *socket, void *arg)
                         origin ? origin : "NULL", pbreply.type(), reply_size);
     } else {
         if (z_debug) {
-            string buffer;
+            std::string buffer;
             if (TextFormat::PrintToString(pbreply, &buffer)) {
                 fprintf(stderr, "reply: %s\n", buffer.c_str());
             }
@@ -1526,7 +1524,7 @@ static void stderr_rtapi_msg_handler(msg_level_t level, const char *fmt,
 
 static void remove_module(std::string name)
 {
-    std::vector<string>::iterator invalid;
+    std::vector<std::string>::iterator invalid;
     invalid = remove(loading_order.begin(), loading_order.end(), name);
 }
 
@@ -1548,8 +1546,8 @@ static int record_instparms(std::shared_ptr<Module> mi)
     void *section = NULL;
     int csize = -1;
     size_t i;
-    vector<string> tokens;
-    string pn;
+    std::vector<std::string> tokens;
+    std::string pn;
 
     csize = mi->elf_section(".rtapi_export", &section);
     if (csize < 0) {
@@ -1558,19 +1556,19 @@ static int record_instparms(std::shared_ptr<Module> mi)
     }
 
     char *s;
-    vector<string> symbols;
-    string sym;
+    std::vector<std::string> symbols;
+    std::string sym;
     for (s = (char *)section; s < ((char *)section + csize); s += strlen(s) + 1)
-        if (strlen(s)) symbols.push_back(string(s));
+        if (strlen(s)) symbols.push_back(std::string(s));
 
     // walk the symbols, and extract the instparam names.
-    string pat(RTAPI_IP_SYMPREFIX "address_");
-    vector<string> instparms;
+    std::string pat(RTAPI_IP_SYMPREFIX "address_");
+    std::vector<std::string> instparms;
     pbstringarray_t iparm;
     iparms[mi->name] = iparm;
 
     for (i = 0; i < symbols.size(); i++) {
-        string ip(symbols[i]);
+        std::string ip(symbols[i]);
         if (ip.rfind(pat) == 0) {
             ip.replace(0, pat.length(), "");
             char **type = mi->sym<char **>(RTAPI_IP_SYMPREFIX "type_" + ip);
@@ -1582,7 +1580,7 @@ static int record_instparms(std::shared_ptr<Module> mi)
             long l;
             char *s;
             char buffer[100];
-            string tmp;
+            std::string tmp;
             if (strlen(*type) == 1) {
                 switch (**type) {
                 case 'i':

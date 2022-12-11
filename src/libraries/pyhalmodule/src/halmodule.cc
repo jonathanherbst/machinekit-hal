@@ -19,7 +19,6 @@
 #include <Python.h>
 #include <string>
 #include <map>
-using namespace std;
 
 #include "runtime/config.h"
 #include "runtime/rtapi.h"

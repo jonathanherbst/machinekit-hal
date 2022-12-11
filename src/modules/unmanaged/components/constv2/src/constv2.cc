@@ -9,8 +9,6 @@
 
 #include "LCNC_Headers.h"
 
-using namespace std;
-
 struct __comp_state
 {
     float_pin_ptr out;
@@ -49,8 +47,8 @@ Const::Const(int argc, char** argv)
     else
         {
         hal_ready(comp_id);
-        cout << "Component \""<< prefix << "\" registered and ready\n"
-            << "comp_ID = " << comp_id << "\n" << endl;
+        std::cout << "Component \""<< prefix << "\" registered and ready\n"
+            << "comp_ID = " << comp_id << "\n" << std::endl;
         }
 
     eventsLoop();

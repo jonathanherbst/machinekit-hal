@@ -1,7 +1,6 @@
 #include <google/protobuf/io/coded_stream.h>
 #include "../base/common.hh"
 
-using namespace std;
 using namespace google::protobuf::io;
 
 inline const uint8* ReadVarint32FromArray(const uint8* buffer, uint32* value) {

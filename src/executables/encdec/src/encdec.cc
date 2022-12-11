@@ -17,7 +17,6 @@
 #include <machinetalk/json2pb.hh>
 
 using namespace machinetalk;
-using namespace std;
 using namespace google::protobuf;
 
 int main(int argc, char* argv[])
@@ -27,7 +26,7 @@ int main(int argc, char* argv[])
     // compatible with the version of the headers we compiled against.
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 
-    string buffer;
+    std::string buffer;
     Container container, got;
     Pin *pin;
     Value *value;
@@ -52,14 +51,14 @@ int main(int argc, char* argv[])
     if (argc == 1) {
 
 	// just dump encoded string to stdout
-	if (!container.SerializeToOstream(&cout)) {
-	    cerr << "Failed to serialize container." << endl;
+	if (!container.SerializeToOstream(&std::cout)) {
+	    std::cerr << "Failed to serialize container." << std::endl;
 	    exit(1);
 	}
     } else {
-	cout << "Container converted to JSON:"  << endl;
+	std::cout << "Container converted to JSON:"  << std::endl;
 	std::string json = pb2json(container);
-	cout << json << endl;
+	std::cout << json << std::endl;
 
 	Container c;
 	try{
@@ -70,27 +69,27 @@ int main(int argc, char* argv[])
 	// printf("c.DebugString=%s\n",c.DebugString().c_str());
 
 	if (TextFormat::PrintToString(c, &buffer)) {
-	    cout << "FromJson: \n" <<  buffer << endl;
+	    std::cout << "FromJson: \n" <<  buffer << std::endl;
 	} else {
-	    cerr << "Fail" << endl;
+	    std::cerr << "Fail" << std::endl;
 	}
 	// generate external text representation
 	if (TextFormat::PrintToString(container, &buffer)) {
-	    cout << "Container: \n" <<  buffer << endl;
+	    std::cout << "Container: \n" <<  buffer << std::endl;
 	} else {
-	    cerr << "Fail" << endl;
+	    std::cerr << "Fail" << std::endl;
 	}
 
 	// and convert back from wire format:
 	if (!TextFormat::ParseFromString(buffer, &got)) {
-	    cerr << "Failed to parse Container " << endl;
+	    std::cerr << "Failed to parse Container " << std::endl;
 	    return -1;
 	}
 
 	if (TextFormat::PrintToString(got, &buffer)) {
-	    cout << "FromWire: \n" <<  buffer << endl;
+	    std::cout << "FromWire: \n" <<  buffer << std::endl;
 	} else {
-	    cerr << "Fail" << endl;
+	    std::cerr << "Fail" << std::endl;
 	}
     }
     // Optional:  Delete all global objects allocated by libprotobuf.

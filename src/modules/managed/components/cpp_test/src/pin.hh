@@ -6,8 +6,6 @@
 #include "hal/hal_accessor.h"
 #include <stdarg.h>
 
-using namespace std;
-
 class Pin
 {
 
