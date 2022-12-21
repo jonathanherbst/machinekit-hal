@@ -57,7 +57,7 @@ add_custom_target(
   create_binary_tree_venv
   COMMAND ${CMAKE_COMMAND} "-E" "rm" "-rf" "${PYTHON_VENV_DIRECTORY}"
   COMMAND ${CMAKE_COMMAND} "-E" "make_directory" "${PYTHON_VENV_DIRECTORY}"
-  COMMAND Python::Interpreter "-m" "venv" "--system-site-packages" "--prompt"
+  COMMAND Python::Interpreter "-m" "virtualenv" "--prompt"
           "machinekit-hal" "${PYTHON_VENV_DIRECTORY}"
   COMMENT
     "(Re)Creating the BINARY tree runtime ${Python_INTERPRETER_ID} ${Python_VERSION} virtual environment"
