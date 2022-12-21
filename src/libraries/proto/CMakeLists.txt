@@ -56,6 +56,9 @@ if(BUILD_PROTO_LIBRARY)
       ${CMAKE_CURRENT_SOURCE_DIR}/src/machinetalk/protobuf/types.proto
       ${CMAKE_CURRENT_SOURCE_DIR}/src/machinetalk/protobuf/value.proto)
 
+  set(SOURCE_NANOPB_PROTO_FILE
+      ${nanopb_SOURCE_DIR}/generator/proto/nanopb.proto)
+
   set(PROTO_GENERATED_BASE_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
   file(MAKE_DIRECTORY ${PROTO_GENERATED_BASE_DIR}/src)
@@ -78,35 +81,17 @@ if(BUILD_PROTO_LIBRARY)
     machinetalk_proto_cc PUBLIC nanopb_interface nanopb_proto_cc
                                 PkgConfig::PROTOBUF)
 
-  find_path(NANOPB_GENERATOR_SOURCE_DIR
-    NAMES nanopb.proto
-    DOC "nanopb generator source"
-    PATHS
-    ${NANOPB_SRC_ROOT_FOLDER}/generator
-    NO_CMAKE_FIND_ROOT_PATH
-    REQUIRED
-  )
-  mark_as_advanced(NANOPB_GENERATOR_SOURCE_DIR)
-
-  find_program(PROTOC_NANOPB_PLUGIN
-    NAMES protoc-gen-nanopb
-    DOC "Nanopb plugin for protoc"
-    PATHS
-    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/Release
-    ${PROTOBUF_SRC_ROOT_FOLDER}/vsprojects/Debug
-    ${NANOPB_SRC_ROOT_FOLDER}/generator-bin
-    ${NANOPB_SRC_ROOT_FOLDER}/generator
-    REQUIRED
-  )
-  mark_as_advanced(PROTOC_NANOPB_PLUGIN)
-
   protobuf_generate(
     LANGUAGE
     cpp
     PROTOC_OUT_DIR
     "${PROTO_GENERATED_BASE_DIR}/src"
     IMPORT_DIRS
-    "${NANOPB_GENERATOR_SOURCE_DIR}"
+    "${nanopb_SOURCE_DIR}/generator/proto" # "${CMAKE_CURRENT_SOURCE_DIR}/src"
+    # PROTOC_PLUGIN
+    # "--plugin=protoc-gen-nanopb=${nanopb_SOURCE_DIR}/generator/protoc-gen-nanopb"
+    # PROTOC_ARGUMENTS "--nanopb_opt=--generated-include-format='#include <%s>'
+    # --extension=.pb --options-file=${CMAKE_CURRENT_SOURCE_DIR}/nanopb.options"
     TARGET
     machinetalk_proto_cc
     PROTOC_WORKDIR
@@ -118,13 +103,13 @@ if(BUILD_PROTO_LIBRARY)
     LANGUAGE
     nanopb
     PROTOC_PLUGIN
-    "--plugin=protoc-gen-nanopb=${PROTOC_NANOPB_PLUGIN}"
+    "--plugin=protoc-gen-nanopb=${nanopb_SOURCE_DIR}/generator/protoc-gen-nanopb"
     PROTOC_ARGUMENTS
     "--nanopb_opt=--generated-include-format='#include \"%s\"' --extension=.npb --options-file=${CMAKE_CURRENT_SOURCE_DIR}/src/nanopb.options"
     PROTOC_OUT_DIR
     "${PROTO_GENERATED_BASE_DIR}/src"
     IMPORT_DIRS
-    "${NANOPB_GENERATOR_SOURCE_DIR}"
+    "${nanopb_SOURCE_DIR}/generator/proto" # "${CMAKE_CURRENT_SOURCE_DIR}/src"
     GENERATE_EXTENSIONS
     ".npb.c"
     ".npb.h"
