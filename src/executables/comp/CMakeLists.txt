@@ -134,7 +134,7 @@ if(BUILD_PYTHON_DISTRIBUTIONS)
               "${CMAKE_CURRENT_BINARY_DIR}/venv_comp"
       COMMAND
         ${CMAKE_COMMAND} "-E" "env"
-        "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/python" "-m" "pip" "install" "--no-deps"
+        "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/python" "-m" "pip" "install"
         "${OUTPUT_INDEX}/*.whl"
       COMMENT "Creating virtual environment for the 'comp' tool")
 
