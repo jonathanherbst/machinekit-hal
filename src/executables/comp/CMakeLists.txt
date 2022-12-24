@@ -88,7 +88,7 @@ if(BUILD_PYTHON_DISTRIBUTIONS)
       COMMAND
         ${CMAKE_COMMAND} "-E" "env"
         "CMAKE_PREFIX_PATH=${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}"
-        "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-w"
+        "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-n" "-w"
         "-o" "${OUTPUT_INDEX}" "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}"
       COMMAND ${CMAKE_COMMAND} "-E" "touch"
               "${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_wheel.stamp"
@@ -106,7 +106,7 @@ if(BUILD_PYTHON_DISTRIBUTIONS)
       COMMAND
         ${CMAKE_COMMAND} "-E" "env"
         "CMAKE_PREFIX_PATH=${MACHINEKIT_HAL_CMAKE_PACKAGE_OUTPUT_DIRECTORY}"
-        "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-s"
+        "CMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}" "${PYPROJECT_BUILD}" "-n" "-s"
         "-o" "${OUTPUT_INDEX}" "${CMAKE_CURRENT_BINARY_DIR}/${PACKAGE_NAME}"
       COMMAND ${CMAKE_COMMAND} "-E" "touch"
               "${CMAKE_CURRENT_BINARY_DIR}/build_${PACKAGE_NAME}_sdist.stamp"
@@ -134,7 +134,8 @@ if(BUILD_PYTHON_DISTRIBUTIONS)
               "${CMAKE_CURRENT_BINARY_DIR}/venv_comp"
       COMMAND
         ${CMAKE_COMMAND} "-E" "env"
-        "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/python" "-m" "pip" "install"
+        "${CMAKE_CURRENT_BINARY_DIR}/venv_comp/bin/python" "-m" "pip" "install" "--no-deps"
+        "--prefix=${CMAKE_CURRENT_BINARY_DIR}/venv_comp/"
         "${OUTPUT_INDEX}/*.whl"
       COMMENT "Creating virtual environment for the 'comp' tool")
 
